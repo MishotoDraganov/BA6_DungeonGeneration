@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="BA6_Graphics2_DungoenGeneration/BA6_Graphics2_DungoenGeneration.vcxproj" Id="9642a6d8-5e50-4b37-b3ab-cf3f007fab68" />
+</Solution>
