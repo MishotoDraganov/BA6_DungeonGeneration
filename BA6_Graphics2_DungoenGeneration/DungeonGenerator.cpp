@@ -46,7 +46,6 @@ std::vector<unsigned char> DungeonGenerator::GetImageBufferPNG(int upscaleFactor
 	int upscaledWidth = width * upscaleFactor;
 	int upscaledHeight = height * upscaleFactor;
 
-	// 4 bytes per pixel: R, G, B, A
 	std::vector<unsigned char> flat(upscaledWidth * upscaledHeight * 4);
 
 	for (int y = 0; y < upscaledHeight; y++)
@@ -60,10 +59,10 @@ std::vector<unsigned char> DungeonGenerator::GetImageBufferPNG(int upscaleFactor
 
 			int index = (y * upscaledWidth + x) * 4;
 
-			flat[index + 0] = color->r; // Red
-			flat[index + 1] = color->g; // Green
-			flat[index + 2] = color->b; // Blue
-			flat[index + 3] = color->a; // Alpha
+			flat[index + 0] = color->r;
+			flat[index + 1] = color->g;
+			flat[index + 2] = color->b;
+			flat[index + 3] = color->a;
 		}
 	}
 
@@ -81,9 +80,9 @@ bool DungeonGenerator::SavePNG(const std::string& filename, int upscaleFactor) c
 		filename.c_str(),
 		upscaledWidth,
 		upscaledHeight,
-		4,                  // RGBA
+		4,                  //rgba
 		GetImageBufferPNG(upscaleFactor).data(),
-		upscaledWidth * 4  // Bytes per row
+		upscaledWidth * 4  //bytes per row
 	);
 	// get all buffers
 }
@@ -110,14 +109,14 @@ void DungeonGenerator::GenerateBSP() {
 
 	DistributeLocksAndKeys();
 
-	
+
 	//fill tile data
 	for (int i = 0; i < LeafNodes.size(); i++) 
-			FillTiles(*LeafNodes[i]);
+		FillTiles(*LeafNodes[i]);
 
 
 	for (int i = 0; i < Edges.size(); i++) 
-			FillTiles(*Edges[i]);	
+		FillTiles(*Edges[i]);	
 }
 
 
@@ -142,12 +141,12 @@ void DungeonGenerator::BinarySpacePartition(Node* thisNode, int depth, int minSi
 
 	bool splitVertical = (std::rand() % 2 == 0);
 
-	
+
 	if (thisNode->Container.AspectRatio() > 4.0f)
 		splitVertical = true;
 	else if (thisNode->Container.AspectRatio() < 0.25f)
 		splitVertical = false;
-		
+
 
 
 	float cutOffPercentage = Utils::RandomRange(0.4f, 0.6f);
@@ -183,7 +182,7 @@ void DungeonGenerator::BinarySpacePartition(Node* thisNode, int depth, int minSi
 
 		Rect top = { thisNode->Container.x, thisNode->Container.y, thisNode->Container.width, split - thisNode->Container.y };
 		Rect bottom = { thisNode->Container.x, split, thisNode->Container.width, thisNode->Container.y + thisNode->Container.height - split };
-		
+
 		Node* topNode = new Node(currentID+1, thisNode, top);
 		Node* bottomNode = new Node(currentID+2, thisNode, bottom);
 
@@ -192,7 +191,7 @@ void DungeonGenerator::BinarySpacePartition(Node* thisNode, int depth, int minSi
 		currentID++;
 		BinarySpacePartition(bottomNode, depth - 1, minSize, currentID);
 	}
-	
+
 }
 
 void DungeonGenerator::ConnectNodesAndMakeEdge(Node* nodeA, Node* nodeB) {
@@ -210,8 +209,8 @@ void DungeonGenerator::ConnectNodesAndMakeEdge(Node* nodeA, Node* nodeB) {
 void DungeonGenerator::AssignDifficulty() {
 
 	//assign starting room at center
-		float closestDistToCenter = std::numeric_limits<float>::max();
-		Node* startNode = LeafNodes[0];
+	float closestDistToCenter = std::numeric_limits<float>::max();
+	Node* startNode = LeafNodes[0];
 	for (int i = 0; i < LeafNodes.size(); i++) {
 		float distToCenter = Utils::Dist(LeafNodes[i]->Container.GetCenterPos(), { static_cast<float>(width) / 2, static_cast<float>(height) / 2 });
 		if (distToCenter < closestDistToCenter) {
@@ -264,9 +263,8 @@ void DungeonGenerator::DistributeLocksAndKeys() {
 	//locks
 	int lockRoom1 = Utils::RandomRange(0, CriticalPath.size() - 2);
 	int lockRoom2 = Utils::RandomRange(0, CriticalPath.size() - 2, lockRoom1);
-	//std::cout << "AAAAAAAAA " << std::to_string(lockRoom1) << " " << std::to_string(lockRoom2) << " " << CrticalPath.size() << "\n";
 
-	
+
 	//switch them if 1 is bigger than 2
 	if (lockRoom1 > lockRoom2) {
 		int temp = lockRoom1;
@@ -294,7 +292,7 @@ void DungeonGenerator::DistributeLocksAndKeys() {
 		for (Node* node : reachedNodes)
 			if (std::find(EndNodes.begin(), EndNodes.end(), node) != EndNodes.end())
 				sharedNodes.push_back(node);
-		
+
 		if (sharedNodes.size() > 0) {
 			int tempI = Utils::RandomRange(0, sharedNodes.size() - 1);
 			sharedNodes[tempI]->Key = lockedEdges[i]->Lock;
@@ -306,16 +304,12 @@ void DungeonGenerator::DistributeLocksAndKeys() {
 			reachedNodes[tempI]->Key = lockedEdges[i]->Lock;
 			keyNodes.push_back(reachedNodes[tempI]);
 		}
-
-
-		//std::cout << "print " << std::to_string(reachedNodes.size()) << " " << std::to_string(lockedEdges[i]->LinkedTo(lockedEdges[i]->LockedDoorNode)->Id) << " " << lockedEdges[i]->LockedDoorNode->Id << "\n";
 	}
 
 	LockedEdges = lockedEdges;
 	KeyNodes = keyNodes;
 }
 
-//dfs
 void DungeonGenerator::FindEndNodes(Node* current,Node* previous, std::vector<Node*>& endNodes)
 {
 	bool hasUnvisitedNeighbor = false;
@@ -333,7 +327,7 @@ void DungeonGenerator::FindEndNodes(Node* current,Node* previous, std::vector<No
 void DungeonGenerator::FindAccessibleNodes(Node* currentNode, std::vector<Edge*> lockedEdges, std::vector<Node*>& reachedNodes, std::vector<Edge*> reachedLockedEdges) {
 	reachedNodes.push_back(currentNode);
 
-	
+
 	for (int i = 0; i < currentNode->ConnectedNodes.size(); i++) {
 
 		//if linked node already visited, don't visit it again
@@ -358,13 +352,12 @@ void DungeonGenerator::FindAccessibleNodes(Node* currentNode, std::vector<Edge*>
 			}
 		}
 		if (isEdgeLocked) {continue;}
-		
-		
+
+
 		//recurse; accessed nodes serves the function of visited nodes
-		if (!isEdgeLocked && !linkedNodeAlreadyVisited) {
-			//std::cout << "working " << currentNode->Id << " " << linkedNode->Id << "\n";
+		if (!isEdgeLocked && !linkedNodeAlreadyVisited) 
 			FindAccessibleNodes(linkedNode, lockedEdges, reachedNodes, reachedLockedEdges);
-		}
+
 	}
 }
 void DungeonGenerator::FindPathBetween(Node* startNode, Node* endNode, std::vector<int>& visited, std::vector<Node*> path, std::vector<Node*>& returnPath) {
@@ -390,13 +383,13 @@ void DungeonGenerator::FindPathBetween(Node* startNode, Node* endNode, std::vect
 
 
 float DungeonGenerator::EvaluateScore() {
-	
+
 
 	//critical playthrough length
 	std::vector<int> visited;
 	std::vector<Node*> path;
 	std::vector<Node*> returnPath;
-	
+
 	std::vector<Node*> sequence = {
 		StartNode, 
 		KeyNodes[0],
@@ -404,9 +397,9 @@ float DungeonGenerator::EvaluateScore() {
 		KeyNodes[1],
 		LockedEdges[1]->LockedDoorNode,
 		BossNode
-		};
-	
-	
+	};
+
+
 	int nodesPassed = 0;
 	for (int i = 0; i < sequence.size() - 1; i++) {
 		FindPathBetween(sequence[i], sequence[i + 1], visited, path, returnPath);
@@ -455,7 +448,7 @@ void DungeonGenerator::RecurseDifficulty(Node* currentNode, int depth, Node*& fu
 			currentNode->ConnectedNodes[i]->Difficulty = static_cast<TileType>(depth);
 			if (depth > 4) 
 				currentNode->ConnectedNodes[i]->Difficulty = static_cast<TileType>(Utils::RandomRange(2, 4));
-				
+
 
 			currentNode->ConnectedNodes[i]->DepthFromStart = depth + 1;
 			RecurseDifficulty(currentNode->ConnectedNodes[i], depth+1, furthestNodeFromStart, furthestDepth);
@@ -466,9 +459,9 @@ void DungeonGenerator::RecurseDifficulty(Node* currentNode, int depth, Node*& fu
 
 void DungeonGenerator::ConnectLeafSiblings() {
 	for (int i = 0; i < LeafNodes.size(); i++) {
-			if (LeafNodes[i] == LeafNodes[i]->Parent->Left) { //only once per pair
-				ConnectNodesAndMakeEdge(LeafNodes[i], LeafNodes[i]->Parent->Right);
-			}	
+		if (LeafNodes[i] == LeafNodes[i]->Parent->Left) { //only once per pair
+			ConnectNodesAndMakeEdge(LeafNodes[i], LeafNodes[i]->Parent->Right);
+		}	
 	}
 }
 
@@ -481,7 +474,7 @@ void DungeonGenerator::ConnectCorridors(Node* thisNode) {
 		PickClosestLeavesFromDifferentBranches(thisNode, closestLeaves);
 		ConnectNodesAndMakeEdge(closestLeaves[0], closestLeaves[1]);
 	}
-	
+
 
 
 	//go up the tree and connect the next pair of nodes
@@ -539,7 +532,7 @@ void DungeonGenerator::CalculateRoomSize() {
 	for (int i = 0; i < LeafNodes.size(); i++) {
 		//generate room on leaf nodes
 		int antiTouch = 1;
-		
+
 		float maxSizePercentage = 0.8f;
 		float minSizePercentage = 0.4f;
 
@@ -566,8 +559,8 @@ bool DungeonGenerator::IsNeighboringTile(int checkX, int checkY, int tileX, int 
 		if (checkY == y)
 			for (int x = tileX - 1; x < tileX + 2; x++)
 				if (checkX == x) return true;
-		
-	
+
+
 	return false;
 }
 //if has key or lock do the speical filltiling with placing key on cneter and lock on door, both with the color tying them together; which reminds me of needing a way to link the 2
@@ -633,70 +626,3 @@ void DungeonGenerator::TryFillEdgeTile(Edge& edge, int x, int y) {
 	}
 }
 
-
-
-/*
-std::vector<Node*> visited;
-std::queue<Node*> toVisit;
-std::vector<LockKeyPair*> gatheredKeys;
-
-
-toVisit.push(StartNode);
-visited.push_back(StartNode);
-
-
-while (!toVisit.empty())
-{
-Node* current = toVisit.front();
-toVisit.pop();
-
-
-//find key
-if (current->Key != nullptr) {
-bool hasKeyAlready = false;
-for(LockKeyPair* key : gatheredKeys)
-if (key->sharedTileType == current->Key->sharedTileType) {
-hasKeyAlready = true;
-break;
-}
-
-if(!hasKeyAlready) 
-gatheredKeys.push_back(current->Key);
-}
-
-//unlock locked doors with gotten keys
-bool doorIsStillLocked = false;
-for (int i=0; i < lockedEdges.size(); i++)
-if (current->Id == lockedEdges[i]->LockedDoorNode->Id) {
-doorIsStillLocked = true;
-
-for (int j=0; j < gatheredKeys.size(); j++)
-if (lockedEdges[i]->Lock->sharedTileType == gatheredKeys[j]->sharedTileType) {
-doorIsStillLocked = false;
-break;
-}
-
-
-break;
-}
-
-
-
-if (doorIsStillLocked)
-toVisit.push(current);
-
-
-
-
-for (Node* neighbor : current->ConnectedNodes)
-{
-if (Utils::VectorContainsNode(visited, *neighbor))
-continue;
-
-visited.push_back(neighbor);
-toVisit.push(neighbor);
-}
-
-}
-
-*/
